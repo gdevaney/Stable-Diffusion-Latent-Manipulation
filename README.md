@@ -28,7 +28,7 @@ During ablation studies, I noticed the noised latent produced by forward diffusi
 #### Masking
 I visualized the noised latent vectors and corresponding masks at each manipulated timestep, determining the optimal threshold for the dynamic mask to balance context preservation and mask coverage. Instead of aggregating cross attention maps, I only masked the cross-attention map building the background scene (e.g. "beach" attention map given prompt "dog on beach"). We crafted a new formula and generated a hyperparameter to guide thresholding:
 
-$ \text{masked attention map} > e^{\mu(\log (\text{subject attention latents})) + \lambda} $
+$$\text{masked attention map} > e^{\mu(\log (\text{subject attention latents})) + \lambda}$$
 
 
 The figure below displays mask thresholding used to silhouette the user's subject and retain the context from the original image by choosing latent vectors in earlier stages of forward diffusion. This technique forced stable diffusion to account for subject features while also giving the model creative power to generate a new scene based on the prompt. 
