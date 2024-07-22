@@ -23,15 +23,17 @@ My approach entailed enhancing stable diffusion models for text-to-image synthes
 
 ![alt text](images/stable_diffusion.png "Altered Stable Diffusion Architecture")
 
-I started by visualizing the noised latent vectors and corresponding masks at each manipulated timestep. Ablation studies were conducted to determine the optimal threshold for the dynamic mask, balancing context preservation and mask coverage. Additionally, instead of aggregating cross attention maps, we only focused on the cross-attention map building the background scene (e.g. "beach" attention map given prompt "dog on beach"). We crafted a new formula and generated a hyperparameter to guide thresholding:
-$$ \text{masked attention map} > e^{\mu(\log (\text{subject attention latents)}) + \lambda} $$
+#### Caching
+During ablation studies, I noticed the noised latent produced by forward diffusion ($z_\tau$) is not a good representation of the original image context. Per the modified Stable Diffusion architecture above, I cached specific latent vectors early in the noising process to retain key features of the original input image. During denoising, the cached latent vectors only replaced pixels defined as the subject by the mask at select timesteps. 
+#### Masking
+I visualized the noised latent vectors and corresponding masks at each manipulated timestep, determining the optimal threshold for the dynamic mask to balance context preservation and mask coverage. Instead of aggregating cross attention maps, I only masked the cross-attention map building the background scene (e.g. "beach" attention map given prompt "dog on beach"). We crafted a new formula and generated a hyperparameter to guide thresholding:
+$ \text{masked attention map} > e^{\mu(\log (\text{subject attention latents)}) + \lambda} $
 
-During our ablation studies, we noticed the noised latent produced by forward diffusion ($z_\tau$) is not a good representation of the original image context. Therefore, we cached specific latent vectors early in the noising process to retain key features of the original input image (Figure 5). The cached latent vectors then replaced only the pixels defined by the mask as the subject at select denoising timesteps. Figure 6 displays the advancements in mask thresholding to better silhouette our subject and the context retained from the original image by choosing latent vectors in earlier stages of forward diffusion. This technique forced stable diffusion to account for subject features while also giving the model creative power to generate a new scene based on the prompt. We used the following hyperparameters for this experiment:
+The figure below displays mask thresholding used to silhouette the user's subject and retain the context from the original image by choosing latent vectors in earlier stages of forward diffusion. This technique forced stable diffusion to account for subject features while also giving the model creative power to generate a new scene based on the prompt. 
 
-% \textbf{strength = $0.7$ and threshold $\lambda = 0.2 $ }
-\begin{itemize}
-    \item strength $= 0.7$, threshold $\lambda = 0.2 $
-\end{itemize}
+![alt text](images/attention_mask.png "Scene-Based Attention Mask and Cached Latent Vector")
+
+
 
 Throughout development, we encountered challenges such as handling prompts with multiple subjects, determining the threshold for the dynamic mask, managing computational complexity, and conducting comprehensive evaluations. These challenges prompted iterative refinement of our approach and underscored the need for careful optimization and experimentation.
 
